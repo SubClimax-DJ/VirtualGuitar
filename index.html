@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Guitar Neck V5 - Tunings Added</title>
+    <title>Virtual Guitar Neck V5 - Tunings Added (Numbers Fixed)</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -275,8 +275,29 @@
         .string:nth-child(4) .fret-dot.double { transform: translate(-50%, 0%); margin-top: 4px; }
 
         /* --- Fret Numbers & Note Display --- */
-        #fret-numbers { display: flex; padding-left: 65px; /* Adjusted for open string marker */ margin-top: 8px; width: 100%; min-width: 650px; }
-        .fret-number { width: 57px; /* (45px marker + 6px margin * 2) / 1 */ text-align: center; font-family: var(--fret-number-font); color: var(--fret-number-color); font-size: 0.9rem; text-shadow: var(--fret-number-shadow); transition: color 0.3s ease, text-shadow 0.3s ease; }
+        #fret-numbers {
+            display: flex;
+            padding-left: 0; /* REMOVED padding */
+            margin-top: 8px;
+            width: 100%; /* Take available width */
+            min-width: 650px; /* Match neck min-width */
+            box-sizing: border-box;
+        }
+        .fret-number {
+            width: 57px; /* Matches fretted marker space (45 + 6 + 6) */
+            text-align: center;
+            font-family: var(--fret-number-font);
+            color: var(--fret-number-color);
+            font-size: 0.9rem;
+            text-shadow: var(--fret-number-shadow);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        /* Adjust the first number's width to match the open string marker space (35w + 20mr) */
+        .fret-number:first-child {
+            width: 55px;
+        }
+
         #neck-bottom-controls { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; width: 100%; max-width: 600px; /* Wider to accommodate tuning */ }
         #neck-bottom-controls .control-section { width: auto; min-width: 150px; /* Slightly smaller min-width */ padding: 10px 15px; }
         #neck-bottom-controls .selector-container select { width: 120px; /* Slightly smaller select */ }
@@ -289,67 +310,43 @@
         .fret-marker.highlight-scale {
             box-shadow: var(--highlight-shadow);
             z-index: 2;
-            /* No border change needed here */
         }
         /* Chord Highlight */
         .fret-marker.highlight-chord {
             box-shadow: var(--chord-highlight-shadow);
             z-index: 2;
-            /* No border change needed here */
         }
         /* Root Note Highlight (Sets border color) */
         .fret-marker.highlight-root {
-            border-color: var(--root-highlight-border-color, red); /* Use variable for color */
-            /* border-width and style are inherited from .fret-marker */
-            z-index: 3; /* Slightly higher z-index for root */
+            border-color: var(--root-highlight-border-color, red);
+            z-index: 3;
         }
 
         /* Clicked State (Overrides base, applies its own border/shadow) */
         .fret-marker.clicked {
             background-color: var(--clicked-marker-bg);
-            border-color: var(--clicked-marker-border); /* Use clicked border color */
+            border-color: var(--clicked-marker-border);
             box-shadow: var(--clicked-marker-shadow);
             transform: scale(1.1);
-            z-index: 4; /* Clicked is highest */
+            z-index: 4;
         }
 
         /* --- Combinations (Rely on Specificity) --- */
-
-        /* Clicked + Scale/Chord Highlight (Clicked styles take precedence visually due to higher specificity/later definition) */
-        .fret-marker.clicked.highlight-scale {
-             /* .clicked styles already applied, maybe combine shadows if desired */
-             /* box-shadow: var(--highlight-shadow), var(--clicked-marker-shadow); */
-             /* Keep z-index from .clicked */
-        }
-        .fret-marker.clicked.highlight-chord {
-             /* .clicked styles already applied */
-             /* box-shadow: var(--chord-highlight-shadow), var(--clicked-marker-shadow); */
-             /* Keep z-index from .clicked */
-        }
-
-        /* Clicked + Root Highlight (Ensure root border color persists) */
+        .fret-marker.clicked.highlight-scale {}
+        .fret-marker.clicked.highlight-chord {}
         .fret-marker.clicked.highlight-root {
-            border-color: var(--root-highlight-border-color, red); /* Re-assert root border color */
-            /* Background and shadow come from .clicked */
-            z-index: 5; /* Highest priority visually */
+            border-color: var(--root-highlight-border-color, red);
+            z-index: 5;
         }
-
-        /* Scale/Chord + Root Highlight (Ensure root border color persists) */
         .fret-marker.highlight-scale.highlight-root,
         .fret-marker.highlight-chord.highlight-root {
-             border-color: var(--root-highlight-border-color, red); /* Re-assert root border color */
-             /* Shadow comes from scale/chord highlight */
-             z-index: 3; /* Keep root z-index */
+             border-color: var(--root-highlight-border-color, red);
+             z-index: 3;
         }
-
-        /* Clicked + Scale/Chord + Root Highlight (Most specific) */
         .fret-marker.clicked.highlight-scale.highlight-root,
         .fret-marker.clicked.highlight-chord.highlight-root {
-            border-color: var(--root-highlight-border-color, red); /* Re-assert root border color */
-            /* Background from .clicked */
-            /* Shadow could be combined if desired, or just use clicked shadow */
-            /* box-shadow: var(--highlight-shadow), var(--clicked-marker-shadow); */
-            z-index: 5; /* Keep highest z-index */
+            border-color: var(--root-highlight-border-color, red);
+            z-index: 5;
         }
 
 
@@ -360,41 +357,19 @@
         @media (max-width: 640px) { .footer { font-size: 0.9rem; flex-direction: column; gap: 5px;} #digital-clock { font-size: 1rem; } }
 
         /* --- Accessibility & Animations --- */
-        /* Added Focus Visible Style */
         *:focus-visible {
             outline: 3px solid var(--select-focus-shadow, blue);
             outline-offset: 2px;
-            box-shadow: 0 0 0 4px rgba(0,0,0,0.2); /* Optional extra visual */
+            box-shadow: 0 0 0 4px rgba(0,0,0,0.2);
         }
         .fret-marker:focus-visible {
-             /* Custom focus for markers: Use root highlight border color for consistency */
              border-color: var(--root-highlight-border-color, cyan);
-             box-shadow: var(--clicked-marker-shadow); /* Reuse clicked shadow for focus */
+             box-shadow: var(--clicked-marker-shadow);
         }
-
-        /* Subtle animation on click/play */
-        .fret-marker.playing {
-            animation: pulse 0.3s ease-out;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1.1); } /* Start at clicked scale */
-            50% { transform: scale(1.18); }
-            100% { transform: scale(1.1); } /* Return to clicked scale */
-        }
-
-        /* String Vibration Animation */
-        @keyframes vibrate {
-            0% { transform: translateY(-50%); }
-            25% { transform: translateY(-50%) translateY(-1px); }
-            50% { transform: translateY(-50%) translateY(1px); }
-            75% { transform: translateY(-50%) translateY(-1px); }
-            100% { transform: translateY(-50%); }
-        }
-        .string-vibrating::before {
-            animation: vibrate 0.1s linear 2; /* Vibrate quickly twice */
-        }
-
-        /* Style added dynamically by JS to color the select dropdown arrows */
+        .fret-marker.playing { animation: pulse 0.3s ease-out; }
+        @keyframes pulse { 0% { transform: scale(1.1); } 50% { transform: scale(1.18); } 100% { transform: scale(1.1); } }
+        @keyframes vibrate { 0% { transform: translateY(-50%); } 25% { transform: translateY(-50%) translateY(-1px); } 50% { transform: translateY(-50%) translateY(1px); } 75% { transform: translateY(-50%) translateY(-1px); } 100% { transform: translateY(-50%); } }
+        .string-vibrating::before { animation: vibrate 0.1s linear 2; }
         #select-arrow-style {} /* Placeholder for JS */
 
     </style>
@@ -622,31 +597,19 @@
     const chordTitle = document.getElementById('chord-title');
 
     // --- Utility Functions ---
-    /**
-     * Calculates the note name and octave for a given string and fret,
-     * using the currently selected tuning in the state.
-     * @param {number} stringIndex - Index of the string (0-5).
-     * @param {number} fret - Fret number (0-12).
-     * @returns {object|null} Object { noteWithOctave: 'C4', noteName: 'C' } or null if invalid input.
-     */
     function getNoteData(stringIndex, fret) {
-        // Use state.currentTuning which is updated when the tuning changes
         if (stringIndex < 0 || stringIndex >= NUM_STRINGS || fret < 0 || fret > NUM_FRETS || !state.currentTuning[stringIndex]) return null;
-
         const openNoteWithOctave = state.currentTuning[stringIndex];
         const openNoteMatch = openNoteWithOctave.match(/([A-G]#?)([0-9]+)/);
-        if (!openNoteMatch) return null; // Should not happen with valid tuning
-
+        if (!openNoteMatch) return null;
         const openNote = openNoteMatch[1];
         const openOctave = parseInt(openNoteMatch[2], 10);
         const openNoteIndex = CHROMATIC_SCALE.indexOf(openNote);
-        if (openNoteIndex === -1) return null; // Should not happen
-
+        if (openNoteIndex === -1) return null;
         const noteIndex = (openNoteIndex + fret) % 12;
         const octaveOffset = Math.floor((openNoteIndex + fret) / 12);
         const noteName = CHROMATIC_SCALE[noteIndex];
         const octave = openOctave + octaveOffset;
-
         return { noteWithOctave: noteName + octave, noteName: noteName };
     }
 
@@ -680,7 +643,6 @@
     function loadFromLocalStorage(key, defaultValue) {
         try {
             const storedValue = localStorage.getItem(key);
-            // Ensure loaded tuning key actually exists in our TUNINGS object
             if (key === STORAGE_KEYS.TUNING && storedValue) {
                 const parsedKey = JSON.parse(storedValue);
                 if (!TUNINGS[parsedKey]) {
@@ -696,14 +658,13 @@
     }
 
     // --- Audio Functions ---
-    // (No changes needed in audio functions for tuning)
     function setupDefaultAudio() {
         if (!window.Tone) { console.error("Tone.js not loaded!"); updateNoteDisplay("Audio library error!", 'error'); return; }
         reverb = new Tone.Reverb(0.4).toDestination();
-        delay = new Tone.FeedbackDelay("8n", 0.2).connect(reverb); // Connect delay to reverb
+        delay = new Tone.FeedbackDelay("8n", 0.2).connect(reverb);
         defaultSynth = new Tone.PolySynth(Tone.Synth, {
             oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.4, release: 0.8 }
-        }).connect(delay); // Connect synth to delay
+        }).connect(delay);
         synths[DEFAULT_SYNTH_TYPE] = defaultSynth;
         currentSynth = defaultSynth;
         console.log("Default audio setup complete.");
@@ -727,12 +688,12 @@
              console.log("Switched synth to:", state.currentSynthType);
        } else {
              console.log("Synth selection stored (will apply on audio start):", state.currentSynthType);
-             currentSynth = defaultSynth; // Fallback if not ready
+             currentSynth = defaultSynth;
        }
     }
 
     function playSoundForMarker(stringIndex, fret, markerElement) {
-        const noteData = getNoteData(stringIndex, fret); // Uses current tuning from state
+        const noteData = getNoteData(stringIndex, fret);
         if (!noteData) { updateNoteDisplay("Error: Note Calc", 'error'); return; };
         if (!state.audioStarted || !currentSynth) { console.warn("Audio not ready or synth not available."); if (!state.audioStarted) updateNoteDisplay("Click again to start sound", 'info'); return; }
 
@@ -742,7 +703,6 @@
                 const velocity = Math.random() * 0.4 + 0.6;
                 activeSynth.triggerAttackRelease(noteData.noteWithOctave, '8n', Tone.now(), velocity);
 
-                // Visual feedback (pulse and vibrate)
                 if (markerElement) {
                     markerElement.classList.add(CSS_CLASSES.PLAYING);
                     setTimeout(() => { markerElement.classList.remove(CSS_CLASSES.PLAYING); }, 300);
@@ -770,7 +730,7 @@
              state.fretMarkers.forEach(marker => {
                  const stringIndex = parseInt(marker.dataset.stringIndex, 10);
                  const fret = parseInt(marker.dataset.fret, 10);
-                 const noteData = getNoteData(stringIndex, fret); // Uses current tuning
+                 const noteData = getNoteData(stringIndex, fret);
                  if (noteData?.noteName === scaleNoteName) {
                      const octaveMatch = noteData.noteWithOctave.match(/\d+$/);
                      if (octaveMatch) {
@@ -792,18 +752,16 @@
     }
 
     // --- DOM Manipulation and UI Updates ---
-
-    /** Populates the tuning selector dropdown */
     function populateTuningSelector() {
         if (!tuningSelect) return;
-        tuningSelect.innerHTML = ''; // Clear existing
+        tuningSelect.innerHTML = '';
         for (const key in TUNINGS) {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = TUNINGS[key].name;
             tuningSelect.appendChild(option);
         }
-        tuningSelect.value = state.currentTuningKey; // Set initial value
+        tuningSelect.value = state.currentTuningKey;
     }
 
     function populateRootNoteSelector() {
@@ -839,30 +797,34 @@
     function createFretNumbers() {
         if (!fretNumbersDiv) return;
         fretNumbersDiv.innerHTML = '';
-        const openLabel = document.createElement('div'); openLabel.classList.add('fret-number'); openLabel.textContent = '0'; fretNumbersDiv.appendChild(openLabel);
-        for (let i = 1; i <= NUM_FRETS; i++) { const numDiv = document.createElement('div'); numDiv.classList.add('fret-number'); numDiv.textContent = i; fretNumbersDiv.appendChild(numDiv); }
+        const openLabel = document.createElement('div');
+        openLabel.classList.add('fret-number');
+        openLabel.textContent = '0';
+        fretNumbersDiv.appendChild(openLabel);
+        for (let i = 1; i <= NUM_FRETS; i++) {
+            const numDiv = document.createElement('div');
+            numDiv.classList.add('fret-number');
+            numDiv.textContent = i;
+            fretNumbersDiv.appendChild(numDiv);
+        }
     }
 
-    /** Updates the displayed note name and title attribute for a single marker */
     function updateMarkerVisual(marker) {
         if (!marker) return;
         const stringIndex = parseInt(marker.dataset.stringIndex, 10);
         const fret = parseInt(marker.dataset.fret, 10);
-        const noteData = getNoteData(stringIndex, fret); // Uses current tuning
+        const noteData = getNoteData(stringIndex, fret);
 
         const noteNameSpan = marker.querySelector(`.${CSS_CLASSES.NOTE_NAME_SPAN}`);
         if (noteNameSpan) {
             noteNameSpan.textContent = noteData ? noteData.noteName : '?';
         }
 
-        // Update tooltip (title attribute)
         const noteDesc = noteData ? `${noteData.noteName} (${noteData.noteWithOctave})` : 'Unknown Note';
-        // Get string name based on current tuning's open note
         const openNote = state.currentTuning[stringIndex]?.replace(/\d/g, '') || `String ${NUM_STRINGS-stringIndex}`;
         marker.title = `${openNote} String, Fret ${fret}: ${noteDesc}`;
     }
 
-    /** Updates the note names and tooltips on all fret markers */
     function updateAllMarkerVisuals() {
          state.fretMarkers.forEach(marker => updateMarkerVisual(marker));
     }
@@ -874,12 +836,10 @@
         marker.dataset.fret = fret;
         marker.tabIndex = 0;
 
-        // Add Note Name Span (content will be set by updateMarkerVisual)
         const noteNameSpan = document.createElement('span');
         noteNameSpan.classList.add(CSS_CLASSES.NOTE_NAME_SPAN);
         marker.appendChild(noteNameSpan);
 
-        // Add fret dots (no change needed here)
         if (fret === 0) {
             marker.classList.add(CSS_CLASSES.OPEN_STRING);
         } else {
@@ -897,10 +857,8 @@
              }
         }
 
-        // Set initial note name and title based on current tuning
-        updateMarkerVisual(marker); // Call helper to set initial text/title
+        updateMarkerVisual(marker);
 
-        // Add event listeners
         marker.addEventListener('click', handleFretClick);
         marker.addEventListener('keydown', (event) => {
              if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); triggerMarkerInteraction(marker); }
@@ -919,7 +877,7 @@
             stringDiv.classList.add(CSS_CLASSES.STRING, 'relative');
             stringDiv.setAttribute('data-string-index', i);
             for (let j = 0; j <= NUM_FRETS; j++) {
-                const marker = createMarkerElement(i, j); // Creates marker with correct initial note/title
+                const marker = createMarkerElement(i, j);
                 stringDiv.appendChild(marker);
                 state.fretMarkers.push(marker);
                 state.fretMarkerMap[`${i}-${j}`] = marker;
@@ -927,23 +885,19 @@
             guitarNeck.appendChild(stringDiv);
         }
         createFretNumbers();
-        // Initial highlights are applied based on loaded state later in initializeApp
         console.log("Guitar neck created.");
     }
 
-    /** Updates highlights for scales OR chords based on state, adding root note highlight */
     function updateHighlights() {
-        // 1. Clear ALL previous highlight classes from all markers
         state.fretMarkers.forEach(marker => {
             marker.classList.remove(
                 CSS_CLASSES.HIGHLIGHT_SCALE,
                 CSS_CLASSES.HIGHLIGHT_CHORD,
                 CSS_CLASSES.HIGHLIGHT_ROOT,
-                CSS_CLASSES.CLICKED // Also clear clicked here
+                CSS_CLASSES.CLICKED
             );
         });
 
-        // 2. Apply current scale/chord highlights and root note highlights
         if (state.currentHighlightType && state.currentHighlightNotes) {
             const highlightClass = state.currentHighlightType === 'scale'
                 ? CSS_CLASSES.HIGHLIGHT_SCALE
@@ -952,7 +906,7 @@
             state.fretMarkers.forEach(marker => {
                 const stringIndex = parseInt(marker.dataset.stringIndex, 10);
                 const fret = parseInt(marker.dataset.fret, 10);
-                const noteData = getNoteData(stringIndex, fret); // Uses current tuning
+                const noteData = getNoteData(stringIndex, fret);
 
                 if (noteData && state.currentHighlightNotes.includes(noteData.noteName)) {
                     marker.classList.add(highlightClass);
@@ -963,12 +917,10 @@
             });
         }
 
-        // 3. Re-apply the 'clicked' class to the last clicked marker
         if (state.lastClickedMarker) {
              state.lastClickedMarker.classList.add(CSS_CLASSES.CLICKED);
         }
 
-        // 4. Update active state for scale buttons (visual feedback)
         scaleControls.querySelectorAll(`.${CSS_CLASSES.SCALE_BUTTON}`).forEach(button => {
             button.classList.toggle(CSS_CLASSES.ACTIVE, button === state.activeScaleButton);
         });
@@ -976,7 +928,7 @@
 
     function highlightClickedMarker(marker) {
        state.lastClickedMarker = marker;
-       updateHighlights(); // Re-run highlights to apply the new clicked state correctly
+       updateHighlights();
     }
 
     function applyTheme(themeName) {
@@ -1023,13 +975,13 @@
             } catch (e) { console.error("Audio Context Error:", e); updateNoteDisplay("Audio Error! Click again?", 'error'); return; }
         }
 
-        const noteData = getNoteData(stringIndex, fret); // Uses current tuning
+        const noteData = getNoteData(stringIndex, fret);
         if (noteData) {
             updateNoteDisplay(`Note: ${noteData.noteName} (${noteData.noteWithOctave})`);
             playSoundForMarker(stringIndex, fret, marker);
         } else { updateNoteDisplay("Error: Note Calc", 'error'); }
 
-        highlightClickedMarker(marker); // Updates state and calls updateHighlights
+        highlightClickedMarker(marker);
     }
 
     // --- Event Handlers ---
@@ -1052,13 +1004,13 @@
             state.currentHighlightType = 'scale'; state.currentHighlightKey = scaleKey; state.currentHighlightNotes = calculateScaleNotes(state.currentRootNote, scaleKey); state.activeScaleButton = button;
             updateNoteDisplay(`${state.currentRootNote} ${scales[scaleKey].name} scale selected.`);
         }
-        updateHighlights(); // This will also update the button's .active class
+        updateHighlights();
     }
 
     function handleChordSelect(event) {
         const chordKey = event.target.value;
         state.activeChordType = chordKey;
-        state.activeScaleButton = null; // Clear active scale button
+        state.activeScaleButton = null;
 
         if (chordKey) {
             state.currentHighlightType = 'chord'; state.currentHighlightKey = chordKey; state.currentHighlightNotes = calculateChordNotes(state.currentRootNote, chordKey);
@@ -1068,7 +1020,7 @@
             state.currentHighlightType = null; state.currentHighlightKey = null; state.currentHighlightNotes = null;
             updateNoteDisplay("Chord deselected.");
         }
-        updateHighlights(); // This will also clear .active from scale buttons
+        updateHighlights();
     }
 
     function handleRootNoteChange(event) {
@@ -1076,38 +1028,32 @@
         updateScaleControlsText();
         updateChordControlsText();
 
-        // Recalculate notes if a scale or chord is active
         if (state.currentHighlightType === 'scale' && state.currentHighlightKey) {
             state.currentHighlightNotes = calculateScaleNotes(state.currentRootNote, state.currentHighlightKey);
         } else if (state.currentHighlightType === 'chord' && state.currentHighlightKey) {
             state.currentHighlightNotes = calculateChordNotes(state.currentRootNote, state.currentHighlightKey);
         }
-        updateHighlights(); // Re-apply highlights based on new root
+        updateHighlights();
         saveToLocalStorage(STORAGE_KEYS.ROOT_NOTE, state.currentRootNote);
     }
 
-    /** Handles changing the tuning selector */
     function handleTuningChange(event) {
         const newTuningKey = event.target.value;
-        if (!TUNINGS[newTuningKey]) return; // Safety check
+        if (!TUNINGS[newTuningKey]) return;
 
         state.currentTuningKey = newTuningKey;
-        state.currentTuning = [...TUNINGS[newTuningKey].notes]; // Update the notes array in state
+        state.currentTuning = [...TUNINGS[newTuningKey].notes];
 
         console.log("Tuning changed to:", TUNINGS[newTuningKey].name);
-
-        // Update visuals on the neck
         updateAllMarkerVisuals();
 
-        // Recalculate highlights if needed
         if (state.currentHighlightType === 'scale' && state.currentHighlightKey) {
             state.currentHighlightNotes = calculateScaleNotes(state.currentRootNote, state.currentHighlightKey);
         } else if (state.currentHighlightType === 'chord' && state.currentHighlightKey) {
             state.currentHighlightNotes = calculateChordNotes(state.currentRootNote, state.currentHighlightKey);
         }
-        updateHighlights(); // Re-apply highlights for the new tuning
-
-        saveToLocalStorage(STORAGE_KEYS.TUNING, newTuningKey); // Save preference
+        updateHighlights();
+        saveToLocalStorage(STORAGE_KEYS.TUNING, newTuningKey);
     }
 
 
@@ -1116,7 +1062,7 @@
     function handleClearHighlights() {
         state.activeScaleButton = null; state.activeChordType = null; state.currentHighlightType = null; state.currentHighlightKey = null; state.currentHighlightNotes = null; state.lastClickedMarker = null;
         if (chordTypeSelect) chordTypeSelect.value = "";
-        updateHighlights(); // Clears visuals including .active buttons
+        updateHighlights();
         updateNoteDisplay("Highlights cleared.");
     }
 
@@ -1136,7 +1082,6 @@
         state.currentRootNote = loadFromLocalStorage(STORAGE_KEYS.ROOT_NOTE, DEFAULT_ROOT_NOTE);
         state.currentSynthType = loadFromLocalStorage(STORAGE_KEYS.SOUND, DEFAULT_SYNTH_TYPE);
         state.currentTuningKey = loadFromLocalStorage(STORAGE_KEYS.TUNING, DEFAULT_TUNING_KEY);
-        // Set the actual tuning notes based on the loaded key
         state.currentTuning = [...(TUNINGS[state.currentTuningKey]?.notes || TUNINGS[DEFAULT_TUNING_KEY].notes)];
 
         console.log("Settings loaded:", {
@@ -1151,33 +1096,31 @@
         if (themeSelect) themeSelect.value = state.currentTheme;
         if (rootNoteSelect) rootNoteSelect.value = state.currentRootNote;
         if (soundSelect) soundSelect.value = state.currentSynthType;
-        if (tuningSelect) tuningSelect.value = state.currentTuningKey; // Set tuning dropdown
+        if (tuningSelect) tuningSelect.value = state.currentTuningKey;
 
         applyTheme(state.currentTheme);
         updateCurrentSynth();
         updateScaleControlsText();
         updateChordControlsText();
-        // Note: Marker visuals are updated during createGuitarNeck based on initial state.currentTuning
     }
 
     function initializeApp() {
         console.log("Initializing Virtual Guitar with Tunings..."); updateNoteDisplay("Initializing...");
 
-        // Check essential elements
         if (!guitarNeck || !controlsPanel || !neckBottomControls || !noteDisplay || !tuningSelect) {
              console.error("Essential DOM elements not found. Aborting initialization.");
              updateNoteDisplay("Initialization Error: Missing Elements!");
              return;
         }
 
-        loadSettings();         // Load saved preferences (including tuning key)
-        setupDefaultAudio();    // Prepare Tone.js
-        populateTuningSelector(); // Fill tuning dropdown
+        loadSettings();
+        setupDefaultAudio();
+        populateTuningSelector();
         populateRootNoteSelector();
         populateChordTypeSelector();
-        createGuitarNeck();     // Build neck (uses initial tuning from loaded settings)
+        createGuitarNeck();
         startClock();
-        applySettings();        // Set UI elements to match loaded settings
+        applySettings();
 
         // --- Setup Event Listeners ---
         if (controlsPanel) {
@@ -1198,13 +1141,12 @@
             neckBottomControls.addEventListener('change', (event) => {
                 if (event.target === themeSelect) handleThemeChange(event);
                 else if (event.target === rootNoteSelect) handleRootNoteChange(event);
-                else if (event.target === tuningSelect) handleTuningChange(event); // Add listener for tuning
+                else if (event.target === tuningSelect) handleTuningChange(event);
             });
         }
         document.addEventListener('keydown', handleKeyDown);
 
-        // Final highlight update after all setup
-        updateHighlights();
+        updateHighlights(); // Final highlight update
 
         updateNoteDisplay("Ready! Click a fret or use keyboard (1-6, Q-\\).");
         console.log("Virtual Guitar Initialized with Tunings.");
